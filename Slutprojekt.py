@@ -3,6 +3,8 @@ from getpwd import getpwd
 import openpyxl
 import time
 
+from openpyxl import Workbook
+
 """ I admin classen vill du ha alla metoder som ska gå att använda
 I aludt har du några färre typ att kolla andras lösenor eller liknande 
 I minor ska man nästan inte ha några ärvda metoder förutom dem som visar saker """
@@ -18,11 +20,14 @@ class Bank:
     def account_balance(self):
         return f"Ditt saldo är: {self.balance} kr"
 
+    def profile(self):
+        return f"{self.name}\n{self.password}"
+
     def change_password(self):
         pass
 
     def save_data(self):
-        path = "Bank_info.xlsx"
+        path = "./Bank_info.xlsx"
         wb_obj = openpyxl.load_workbook(path)
         sheet_obj = wb_obj.active
         max_ro = sheet_obj.max_row
@@ -30,12 +35,12 @@ class Bank:
         for x in range(1, max_ro + 1):
 
             name = sheet_obj.cell(row = x, column = 1)
-            print(name.value)
             if name.value == self.name:
-
-                cell_obj = sheet_obj.cell(row = x, column = 1)
-                cell_obj.value = "funkar"
-                print(cell_obj.value)
+                sheet_obj.cell(row=x, column=1).value = self.name
+                sheet_obj.cell(row=x, column=2).value = self.password
+                sheet_obj.cell(row=x, column=3).value = self.balance
+                print()
+                wb_obj.save("./Bank_info.xlsx")
                 break # Saker inte funka som det ska
 
 class Admin(Bank):
@@ -55,7 +60,7 @@ class Minor(Bank):
 
 # Functions
 def login():
-    path = "Bank_info.xlsx"
+    path = "./Bank_info.xlsx"
     wb_obj = openpyxl.load_workbook(path)
     sheet_obj = wb_obj.active
     max_col = sheet_obj.max_column
@@ -102,7 +107,7 @@ def login():
                 print("Fel användarnamn eller lösenord")
                 print("Du har", trys, "försök kvar")
                 if trys < 1:
-                    print("Du kan logga i igen om:")
+                    print("Du kan logga in igen om:")
                     for i in range(6):
                         print(f"{(6-i)*10} sekunder")
                         time.sleep(1)
@@ -141,8 +146,8 @@ def main():
         elif user_input == 2:
             print()# Gå till profil
         elif user_input == 3:
-            print()# Byta användare
+            login()# Byta användare
         elif user_input == 4:
-            return(user.save_data())# Avsluta och spara data
+            user.save_data()# Avsluta och spara data
         
 main()
