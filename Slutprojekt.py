@@ -1,9 +1,16 @@
-
 from getpwd import getpwd
 import openpyxl
 import time
-
 from openpyxl import Workbook
+
+""" 
+Bra att veta om man ska köra programmet: 
+Anv.namn:       Lösen:          Kontotyp:
+Särpär          jaeful          Admin
+Segbert         dinmamma        Adult
+Nicko           komunist123     Minor
+"""
+
 
 class Bank:
     def __init__(self, name, password, balance, role):
@@ -12,14 +19,17 @@ class Bank:
         self.balance = balance
         self.role = role
 
+
     def __str__(self):
         return (
             "----------------------------------------"
             f"\nVälkommen!\nInloggad användare: {self.name}"
         )
     
+
     def roles(self):
         return self.role
+
 
     def account_balance(self):
         return (
@@ -27,6 +37,7 @@ class Bank:
             f"\nDitt saldo är: {self.balance}"
             " kr\n------------------------------"
         )
+
 
     def profile(self):
         return (
@@ -37,21 +48,29 @@ class Bank:
             "\n------------------------------"
         )
 
+    # Här får användaren donera pengar till banken
     def donate(self):
             try:
-                user_donation = int(input("\nHur mycket pengar(kr) vill du donera till banken?\n: "))
+                # Jag vet att man inte bör ha input i class-
+                # men jag fick inte till det på något bra sätt annars :(
+                user_donation = int(input(
+                    "\nHur mycket pengar(kr) vill du donera till banken?\n: "
+                    ))
                 if user_donation <= 0:
                     print("\nDu kan inte donera mindre än 1 krona.")
                 elif user_donation < self.balance:
                     self.balance = self.balance - user_donation
                     print("\nTack för din donation!\nVi älskar dina pengar!")
                 elif user_donation > self.balance:
-                    print("Betalning misslyckades :(\nDitt saldo är för lågt!\nDu kan se ditt ""saldo"" under Mitt saldo.")
+                    print("Betalning misslyckades :(\nDitt saldo är för lågt!"
+                    "\nDu kan se ditt ""saldo"" under Mitt saldo.")
                 
             except:
                 print("Du kan bara donera hela kronor.")
             print("----------------------------------------")
+    
 
+    # Sparar över all data från användaren till exceldokumentet
     def save_data(self):
         path = "./Bank_info.xlsx"
         wb_obj = openpyxl.load_workbook(path)
@@ -67,12 +86,15 @@ class Bank:
                 sheet_obj.cell(row=x, column=3).value = self.balance
                 print()
                 wb_obj.save("./Bank_info.xlsx")
-                break # Saker inte funka som det ska
+                break
+
 
 class Admin(Bank):
     def __init__(self, name, password, balance, role):
         super().__init__(name, password, balance, role)
 
+
+    # Visar Admin allas kontoinformation som finns i exceldokumentet
     def see_accounts():
         path = "./Bank_info.xlsx"
         wb_obj = openpyxl.load_workbook(path)
@@ -92,30 +114,38 @@ class Admin(Bank):
             time.sleep(0.5)
         print("\n--------------------")
 
+
 class Adult(Bank):
     def __init__(self, name, password, balance, role):
         super().__init__(name, password, balance, role)
 
+
 class Minor(Bank):
     def __init__(self, name, password, balance, role):
         super().__init__(name, password, balance, role)
+    
 
+    # Hindrar mindreåriga att donera
     def donate(self):
         print("Detta konto är inställt som underårig."
         "\nFråga dina föräldrar om hjälp")
 
-# Functions
+
+# Funktioner:
+
 def login():
+    # Här öppnar programmet exceldokumentet
     path = "./Bank_info.xlsx"
     wb_obj = openpyxl.load_workbook(path)
     sheet_obj = wb_obj.active
     max_col = sheet_obj.max_column
     max_ro = sheet_obj.max_row
     
+    # Antal inloggnings försök man har
     trys = 4
     run = True
     while run == True:
-        
+        # Användaren får logga in med anv.namn och lös.ord
         input_name = str(input("\n\nAnvändarnamn: "))
         password = getpwd("Lösenord: ")
 
@@ -130,7 +160,7 @@ def login():
                     print("\nDu hade rätt användarnamn och lösenord")
                     run = False
                     break
-
+        # Här testar programmet om lösen och anv.namn stämmer
         if password != pass_check.value or name.value != input_name:
                 trys = trys-1
                 print("Fel användarnamn eller lösenord")
@@ -142,7 +172,7 @@ def login():
                         time.sleep(1)
                     trys = 4
 
-
+    # Här skapas objektet utifrån vilket konto som är inloggat
     role = sheet_obj.cell(row = x, column = 4)
     balance = sheet_obj.cell(row = x, column = 3)
     if role.value == "Admin":
@@ -157,7 +187,9 @@ def login():
     print(user)
     return user
 
-def donate(user = ""):
+
+# Användaren blir frågad om den vill donera till banken
+def donate(user = ""): 
     print("\n----------------------------------------")
     while True:
         try:
@@ -167,6 +199,7 @@ def donate(user = ""):
             print("\nHoppsan! Något gick fel.\n")
             time.sleep(2)
         if user_agree == "ja":
+            # Om användaren vill donera används metoden user.donate()
             user.donate()
             break
         elif user_agree == "nej":
@@ -181,6 +214,7 @@ def donate(user = ""):
             time.sleep(2)
 
 
+# Mainfunk. där programmet körs ifrån
 def main():
     print("\nVälkommen till Bankens internettjänst!")
     user = login()
